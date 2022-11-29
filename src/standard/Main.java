@@ -43,20 +43,23 @@ public class Main {
 	public Main() {
 		buildArrays();
 		// Test input
-		origin = 5020;
-		dest = createDest(origin, 20);
-		long time = System.currentTimeMillis();
-
-		/*
-		 * for(int i=0;i<nodeToEdge.length;i++) { if(nodeToEdge[i+1]-nodeToEdge[i]>5) {
-		 * for(int j=nodeToEdge[i];j<nodeToEdge[i+1];j++) {
-		 * System.out.println(edges[0][j]+" "+edges[1][j]); } System.out.println("t"); }
-		 * System.out.println("Node:"+i+" Edges:"+nodeToEdge[i]); }
-		 */
-
-		// Distances set to infinity
+		origin = 95020;
+		dest = 95021;
 		Arrays.fill(distanceFromOrigin, Long.MAX_VALUE);
 		distanceFromOrigin[origin] = 0;
+		
+		long time = System.currentTimeMillis();
+		// Distances set to infinity
+		
+		dijkstraOneToOne();
+		
+		System.out.println(queue.isEmpty());
+		System.out.println("Done?");
+		System.out.println(distanceFromOrigin[dest] + "  maxdist: " + Integer.MAX_VALUE);
+		System.out.println("Time: " + (System.currentTimeMillis() - time));
+	}
+	
+	public void dijkstraOneToAll() {
 		enqueueChildren(origin);
 		while (!queue.isEmpty()) {
 			//System.out.println("queued:" + queue.size() + "  done:" + loopcounter);
@@ -68,12 +71,18 @@ public class Main {
 			// }
 			updateChildrenAlt(currentNode);
 		}
-		System.out.println(queue.isEmpty());
-		System.out.println("Done?");
-		System.out.println(distanceFromOrigin[dest] + "  maxdist: " + Integer.MAX_VALUE);
-		System.out.println("Time: " + (System.currentTimeMillis() - time));
 	}
-
+	public void dijkstraOneToOne() {
+		enqueueChildren(origin);
+		int currentNode=-1;
+		while (!queue.isEmpty()&&!checked[dest]) {
+			//System.out.println("queued:" + queue.size() + "  done:" + loopcounter);
+			currentNode = queue.poll();
+			checked[currentNode]=true;
+			updateChildrenAlt(currentNode);
+		}
+	}
+	
 	//1. Run: Time 68557
 	//2. Run: Time 69756
 	//3. Run: Time 69628
