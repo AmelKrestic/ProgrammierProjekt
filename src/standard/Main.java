@@ -45,47 +45,48 @@ public class Main {
 		// Test input
 		origin = 95020;
 		dest = 95021;
-		Arrays.fill(distanceFromOrigin, Long.MAX_VALUE);
-		distanceFromOrigin[origin] = 0;
-		
-		long time = System.currentTimeMillis();
 		// Distances set to infinity
+		Arrays.fill(distanceFromOrigin, Long.MAX_VALUE);
 		
-		dijkstraOneToOne();
+		distanceFromOrigin[origin] = 0;
+		long time = System.currentTimeMillis();
+		
+		dijkstraOneToAll();
 		
 		System.out.println(queue.isEmpty());
-		System.out.println("Done?");
-		System.out.println(distanceFromOrigin[dest] + "  maxdist: " + Integer.MAX_VALUE);
+		System.out.println("Dijkstra Done");
+		System.out.println(distanceFromOrigin[dest] + "  maxdist: " + Long.MAX_VALUE);
 		System.out.println("Time: " + (System.currentTimeMillis() - time));
 	}
 	
 	public void dijkstraOneToAll() {
-		enqueueChildren(origin);
+		updateChildren(origin);
 		while (!queue.isEmpty()) {
 			//System.out.println("queued:" + queue.size() + "  done:" + loopcounter);
 			int currentNode = queue.poll();
-			checked[currentNode]=true;
-			// if(currentNode==dest) {
-			// System.out.println("Correct Exit");
-			// break;
-			// }
-			updateChildrenAlt(currentNode);
+			
+			if(!checked[currentNode]) {
+				checked[currentNode]=true;
+				updateChildren(currentNode);
+			}
+			
 		}
 	}
 	public void dijkstraOneToOne() {
-		enqueueChildren(origin);
+		updateChildren(origin);
 		int currentNode=-1;
 		while (!queue.isEmpty()&&!checked[dest]) {
-			//System.out.println("queued:" + queue.size() + "  done:" + loopcounter);
 			currentNode = queue.poll();
-			checked[currentNode]=true;
-			updateChildrenAlt(currentNode);
+			if(!checked[currentNode]) {
+				checked[currentNode]=true;
+				updateChildren(currentNode);
+			}
 		}
 	}
 	
-	//1. Run: Time 68557
-	//2. Run: Time 69756
-	//3. Run: Time 69628
+
+	
+	
 	private void updateChildren(int nodeID) {
 		long parentDist = distanceFromOrigin[nodeID];
 		for (int currentEdge = nodeToEdge[nodeID]; currentEdge < nodeToEdge[nodeID + 1]; currentEdge++) {
@@ -93,31 +94,7 @@ public class Main {
 			if (!checked[childNode]) {
 				// Updated distance and position in queue
 				long potentialDist = parentDist + edges[2][currentEdge];
-				if(!queue.contains(childNode)) {
-					distanceFromOrigin[childNode] = potentialDist;
-					queue.add(childNode);
-					previous[childNode] = nodeID;
-				}else if (distanceFromOrigin[childNode] > potentialDist) {
-					queue.remove(childNode);
-					distanceFromOrigin[childNode] = potentialDist;
-					queue.add(childNode);
-					previous[childNode] = nodeID;
-				}
-			}
-		}
-	}
-	
-	// 1. Run: Time 61545
-	// 2. Run: Time 63887
-	private void updateChildrenAlt(int nodeID) {
-		long parentDist = distanceFromOrigin[nodeID];
-		for (int currentEdge = nodeToEdge[nodeID]; currentEdge < nodeToEdge[nodeID + 1]; currentEdge++) {
-			int childNode = edges[1][currentEdge];
-			if (!checked[childNode]) {
-				// Updated distance and position in queue
-				long potentialDist = parentDist + edges[2][currentEdge];
 				if (distanceFromOrigin[childNode] > potentialDist) {
-					queue.remove(childNode);
 					distanceFromOrigin[childNode] = potentialDist;
 					queue.add(childNode);
 					previous[childNode] = nodeID;
@@ -126,24 +103,6 @@ public class Main {
 		}
 	}
 
-	private void enqueueChildren(int nodeID) {
-		long parentDist = distanceFromOrigin[nodeID];
-		for (int i = 0; i < nodeToEdge[nodeID + 1] - nodeToEdge[nodeID]; i++) {
-			int currentEdge = nodeToEdge[nodeID + i];
-			int childNode = edges[1][currentEdge];
-			int cost = edges[2][currentEdge];
-
-			// Updated distance and position in queue
-			long potentialDist = parentDist + cost;
-			if (distanceFromOrigin[childNode] > potentialDist) {
-				queue.remove(childNode);
-				distanceFromOrigin[childNode] = potentialDist;
-				queue.add(childNode);
-				previous[childNode] = nodeID;
-			}
-		}
-
-	}
 
 	private void enqueueAll() {
 		for (int i = 0; i < nodeToEdge.length - 1; i++) {
@@ -234,27 +193,5 @@ public class Main {
 		System.out.println(cords[0][edges[1][125489]] + " " + cords[1][edges[1][125489]]);
 	}
 
-	private class SimpleNode implements Comparable<SimpleNode> {
-
-		int id = 0;
-		int weight = 0;
-
-		public SimpleNode(int id, int weight) {
-			this.id = id;
-			this.weight = weight;
-		}
-
-		@Override
-		public int compareTo(SimpleNode o) {
-
-			return weight - o.weight;
-		}
-
-		@Override
-		public String toString() {
-
-			return "id: " + id + " weight: " + weight;
-		}
-	}
 
 }
