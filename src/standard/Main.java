@@ -62,9 +62,7 @@ public class Main {
 	public void dijkstraOneToAll() {
 		updateChildren(origin);
 		while (!queue.isEmpty()) {
-			//System.out.println("queued:" + queue.size() + "  done:" + loopcounter);
 			int currentNode = queue.poll();
-			
 			if(!checked[currentNode]) {
 				checked[currentNode]=true;
 				updateChildren(currentNode);
@@ -72,11 +70,16 @@ public class Main {
 			
 		}
 	}
+	
+	
 	public void dijkstraOneToOne() {
 		updateChildren(origin);
 		int currentNode=-1;
 		while (!queue.isEmpty()&&!checked[dest]) {
 			currentNode = queue.poll();
+			if(currentNode==dest) {
+				break;
+			}
 			if(!checked[currentNode]) {
 				checked[currentNode]=true;
 				updateChildren(currentNode);
