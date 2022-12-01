@@ -33,48 +33,57 @@ public class Main {
 	private int origin = 0;
 	private int dest = 0;
 	private File input = new File("./germany.fmi");
+	private File que = new File("./germany.fmi");
+	private File sol = new File("./germany.fmi");
 	private PriorityQueue<Integer> queue = new PriorityQueue<>(new Comparator<Integer>() {
 		@Override
 		public int compare(Integer o1, Integer o2) {
-			return (int) (distanceFromOrigin[o1] - distanceFromOrigin[o2]);
+			return (int)Math.signum( ((distanceFromOrigin[o1] - distanceFromOrigin[o2])/128));
 		}
 
 	});
 
 	public static void main(String[] args) {
-		Main m=new Main();
+		new Main(0);
 		
 	}
-
 	public Main() {
+		
+	}
+	
+	private Main(int a) {
 		buildArrays();
+		long time = System.currentTimeMillis();
+		createGrid();
+		System.out.println("Time Grid for Closest Node: " + (System.currentTimeMillis() - time));
 		// Test input
 		//origin = 95020;
 		//dest = 95021;
-		long time = System.currentTimeMillis();
-		createGrid();
-		origin=nodeFromCoordinate( 48.746,9.098);
-		dest=nodeFromCoordinate(48.565,9.418 );
-		System.out.println("Time Closest Node: " + (System.currentTimeMillis() - time));
-		// Distances set to infinity
-		Arrays.fill(distanceFromOrigin, Long.MAX_VALUE);
-
-		distanceFromOrigin[origin] = 0;
 		
 		time = System.currentTimeMillis();
-		dijkstraOneToOne();
+		origin=nodeFromCoordinate( 48.746,9.098);
+		dest=nodeFromCoordinate(48.665,9.118 );
+		System.out.println("Time Closest Node: " + (System.currentTimeMillis() - time));
+
+		time = System.currentTimeMillis();
+		dijkstraOneToAll();
 		System.out.println("Time Dijkstra: " + (System.currentTimeMillis() - time));
 		System.out.println("Dijkstra Done");
-		System.out.println(distanceFromOrigin[dest] + "  maxdist: " + Long.MAX_VALUE);
+		System.out.println(distanceFromOrigin[dest]);
 		System.out.println(calcDistanceNodeNode(origin, dest));
-		int node=dest;
-		int counter=0;
-		while(node!=origin) {
-			node=previous[node];
-			counter++;
-		}
-		System.out.println(counter);
+		
 	}
+	
+	private void reset() {
+		int nodeNr=distanceFromOrigin.length;
+		distanceFromOrigin = new long[nodeNr];
+		previous = new int[nodeNr];
+		checked = new boolean[nodeNr];
+		Arrays.fill(distanceFromOrigin, Long.MAX_VALUE/16);
+		distanceFromOrigin[origin] = 0;
+	}
+	
+	
 	public void setOrigin(int origin) {
 		this.origin=origin;
 	}
@@ -82,7 +91,7 @@ public class Main {
 		this.dest=dest;
 	}
 
-	private void createGrid() {
+	public void createGrid() {
 		for (int i = 0; i < grid.length; i++) {
 			for (int j = 0; j < grid[0].length; j++) {
 				grid[i][j] = new ArrayList<>();
@@ -133,9 +142,11 @@ public class Main {
 	}
 	
 	public void dijkstraOneToAll() {
+		reset();
+		int currentNode=-1;
 		updateChildren(origin);
 		while (!queue.isEmpty()) {
-			int currentNode = queue.poll();
+			currentNode = queue.poll();
 			if (!checked[currentNode]) {
 				checked[currentNode] = true;
 				updateChildren(currentNode);
@@ -145,13 +156,12 @@ public class Main {
 	}
 
 	public void dijkstraOneToOne() {
+		reset();
+		
 		updateChildren(origin);
 		int currentNode = -1;
 		while (!queue.isEmpty() && !checked[dest]) {
 			currentNode = queue.poll();
-			if (currentNode == dest) {
-				break;
-			}
 			if (!checked[currentNode]) {
 				checked[currentNode] = true;
 				updateChildren(currentNode);
@@ -175,6 +185,18 @@ public class Main {
 		}
 	}
 
+	/*
+	 * [0]=lat , [1]=lon
+	 */
+	public double[] coordsFromNode(int id) {
+		double[] a= {cords[0][id],cords[1][id]};
+		return a;
+	}
+	
+	public long distFromNode(int id) {
+		return distanceFromOrigin[id];
+	}
+	
 	private double calcDistanceNodeNode(int id1, int id2) {
 		double dX = 71.5 * (cords[1][id1] - cords[1][id2]);
 		double dY = 111.3 * (cords[0][id1] - cords[0][id2]);
@@ -189,7 +211,10 @@ public class Main {
 		return Math.sqrt(dX*dX + dY * dY);
 	}
 
-	
+	public void readFile(String path) {
+		input=new File(path);
+		buildArrays();
+	}
 
 	private void buildArrays() {
 		long l = System.currentTimeMillis();
