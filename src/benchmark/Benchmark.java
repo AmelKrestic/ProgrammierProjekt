@@ -1,5 +1,6 @@
-package standard;
+package benchmark;
 
+import standard.*;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.util.Scanner;
@@ -14,14 +15,14 @@ public class Benchmark {
 		String quePath = args[7];
 		int sourceNodeId = Integer.parseInt(args[9]);
 		
-		Main m=new Main();
+		RoutePlanner planner=new RoutePlanner();
 		
 		// run benchmarks
 		System.out.println("Reading graph file and creating graph data structure (" + graphPath + ")");
 		long graphReadStart = System.currentTimeMillis();
 		// TODO: read graph here
 		
-		m.readFile(graphPath);
+		planner.readFile(graphPath);
 		
 		long graphReadEnd = System.currentTimeMillis();
 		System.out.println("\tgraph read took " + (graphReadEnd - graphReadStart) + "ms");
@@ -29,15 +30,15 @@ public class Benchmark {
 		System.out.println("Setting up closest node data structure...");
 		// TODO: set up closest node data structure here
 
-		m.createGrid();
+		planner.createGrid();
 		
 		System.out.println("Finding closest node to coordinates " + lon + " " + lat);
 		long nodeFindStart = System.currentTimeMillis();
 		double[] coords = {0.0, 0.0};
 		// TODO: find closest node here and write coordinates into coords
 		
-		int node=m.nodeFromCoordinate(lat, lon);
-		double[] temp=m.coordsFromNode(node);
+		int node=planner.nodeFromCoordinate(lat, lon);
+		double[] temp=planner.coordsFromNode(node);
 		coords[0]=temp[1];
 		coords[1]=temp[0];
 		//Internally we used the order latitude longitude
@@ -56,10 +57,10 @@ public class Benchmark {
 				// TODO set oneToOneDistance to the distance from
 				// oneToOneSourceNodeId to oneToOneSourceNodeId as computed by
 				// the one-to-one Dijkstra
-				m.setOrigin(oneToOneSourceNodeId);
-				m.setDestination(oneToOneTargetNodeId);
-				m.dijkstraOneToOne();
-				oneToOneDistance=(int)m.distFromNode(oneToOneTargetNodeId);
+				planner.setOrigin(oneToOneSourceNodeId);
+				planner.setDestination(oneToOneTargetNodeId);
+				planner.dijkstraOneToOne();
+				oneToOneDistance=(int)planner.distFromNode(oneToOneTargetNodeId);
 				System.out.println(oneToOneDistance);
 			}
 		} catch (Exception e) {
@@ -75,7 +76,7 @@ public class Benchmark {
 		long oneToAllStart = System.currentTimeMillis();
 		// TODO: run one-to-all Dijkstra here
 
-		m.dijkstraOneToAll();
+		planner.dijkstraOneToAll();
 		long oneToAllEnd = System.currentTimeMillis();
 		System.out.println("\tone-to-all Dijkstra took " + (oneToAllEnd - oneToAllStart) + "ms");
 
@@ -85,7 +86,7 @@ public class Benchmark {
 		int oneToAllDistance = -42;
 		// TODO set oneToAllDistance to the distance from sourceNodeId to
 		// targetNodeId as computed by the one-to-all Dijkstra
-		oneToAllDistance=(int)m.distFromNode(targetNodeId);
+		oneToAllDistance=(int)planner.distFromNode(targetNodeId);
 		System.out.println("Distance from " + sourceNodeId + " to " + targetNodeId + " is " + oneToAllDistance);
 	}
 

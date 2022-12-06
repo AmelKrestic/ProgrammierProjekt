@@ -13,7 +13,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.PriorityQueue;
 
-public class Main {
+public class RoutePlanner {
 	/*
 	 * for each node: nodeID nodeID2 latitude longitude elevation for each edge:
 	 * srcIDX trgIDX cost type maxspeed nodeID2, elevation, type and maxspeed can be
@@ -26,6 +26,7 @@ public class Main {
 	private int[] previous;
 	private boolean[] checked;
 	// new List[7798][9220];
+	@SuppressWarnings("unchecked")
 	private List<Integer>[][] grid = new List[780][923]; // Lat/long
 	private int gridFactor = 100;
 	private final static double MINLATITUDE = 47.284;
@@ -33,8 +34,6 @@ public class Main {
 	private int origin = 0;
 	private int dest = 0;
 	private File input = new File("./germany.fmi");
-	private File que = new File("./germany.fmi");
-	private File sol = new File("./germany.fmi");
 	private PriorityQueue<Integer> queue = new PriorityQueue<>(new Comparator<Integer>() {
 		@Override
 		public int compare(Integer o1, Integer o2) {
@@ -43,15 +42,11 @@ public class Main {
 
 	});
 
-	public static void main(String[] args) {
-		new Main(0);
-		
-	}
-	public Main() {
+	public RoutePlanner() {
 		
 	}
 	
-	private Main(int a) {
+	private RoutePlanner(int a) {
 		buildArrays();
 		long time = System.currentTimeMillis();
 		createGrid();
