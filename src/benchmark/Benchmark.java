@@ -14,18 +14,16 @@ public class Benchmark {
 		double lat = Double.parseDouble(args[5]);
 		String quePath = args[7];
 		int sourceNodeId = Integer.parseInt(args[9]);
-		
-		String solPath="./Benchs/germany.sol";
-		
-		RoutePlanner planner=new RoutePlanner();
-		
+
+		RoutePlanner planner = new RoutePlanner();
+
 		// run benchmarks
 		System.out.println("Reading graph file and creating graph data structure (" + graphPath + ")");
 		long graphReadStart = System.currentTimeMillis();
 		// TODO: read graph here
-		
+
 		planner.readFile(graphPath);
-		
+
 		long graphReadEnd = System.currentTimeMillis();
 		System.out.println("\tgraph read took " + (graphReadEnd - graphReadStart) + "ms");
 
@@ -33,32 +31,29 @@ public class Benchmark {
 		// TODO: set up closest node data structure here
 
 		planner.createGrid();
-		
+
 		System.out.println("Finding closest node to coordinates " + lon + " " + lat);
 		long nodeFindStart = System.currentTimeMillis();
-		double[] coords = {0.0, 0.0};
+		double[] coords = { 0.0, 0.0 };
 		// TODO: find closest node here and write coordinates into coords
-		
-		int node=planner.nodeFromCoordinate(lat, lon);
-		double[] temp=planner.coordsFromNode(node);
-		coords[0]=temp[1];
-		coords[1]=temp[0];
-		//Internally we used the order latitude longitude
-		
+
+		int node = planner.nodeFromCoordinate(lat, lon);
+		double[] temp = planner.coordsFromNode(node);
+		coords[0] = temp[1];
+		coords[1] = temp[0];
+		// Internally we used the order latitude longitude
+
 		long nodeFindEnd = System.currentTimeMillis();
-		System.out.println("\tfinding node took " + (nodeFindEnd - nodeFindStart) + "ms: " + coords[0] + ", " + coords[1]);
+		System.out.println(
+				"\tfinding node took " + (nodeFindEnd - nodeFindStart) + "ms: " + coords[0] + ", " + coords[1]);
 
 		System.out.println("Running one-to-one Dijkstras for queries in .que file " + quePath);
 		long queStart = System.currentTimeMillis();
 		try (BufferedReader bufferedReader = new BufferedReader(new FileReader(quePath))) {
-			BufferedReader bufferedReader2 = new BufferedReader(new FileReader(solPath));
 			String currLine;
-			
 			while ((currLine = bufferedReader.readLine()) != null) {
-				String currLine2=bufferedReader2.readLine();
 				int oneToOneSourceNodeId = Integer.parseInt(currLine.substring(0, currLine.indexOf(" ")));
 				int oneToOneTargetNodeId = Integer.parseInt(currLine.substring(currLine.indexOf(" ") + 1));
-				int givenDist=Integer.parseInt(currLine2);
 				int oneToOneDistance = -42;
 				// TODO set oneToOneDistance to the distance from
 				// oneToOneSourceNodeId to oneToOneSourceNodeId as computed by
@@ -66,13 +61,9 @@ public class Benchmark {
 				planner.setOrigin(oneToOneSourceNodeId);
 				planner.setDestination(oneToOneTargetNodeId);
 				planner.dijkstraOneToOne();
-				oneToOneDistance=(int)planner.distFromNode(oneToOneTargetNodeId);
-				if(oneToOneDistance!=givenDist) {
-					System.out.println(oneToOneDistance +"  "+givenDist);
-				}else {
-					System.out.println(oneToOneDistance);
-				}
-				
+				oneToOneDistance = (int) planner.distFromNode(oneToOneTargetNodeId);
+				System.out.println(oneToOneDistance);
+
 			}
 		} catch (Exception e) {
 			System.out.println("Exception...");
@@ -80,9 +71,7 @@ public class Benchmark {
 		}
 		long queEnd = System.currentTimeMillis();
 		System.out.println("\tprocessing .que file took " + (queEnd - queStart) + "ms");
-		
-		
-		
+
 		System.out.println("Computing one-to-all Dijkstra from node id " + sourceNodeId);
 		long oneToAllStart = System.currentTimeMillis();
 		// TODO: run one-to-all Dijkstra here
@@ -97,7 +86,7 @@ public class Benchmark {
 		int oneToAllDistance = -42;
 		// TODO set oneToAllDistance to the distance from sourceNodeId to
 		// targetNodeId as computed by the one-to-all Dijkstra
-		oneToAllDistance=(int)planner.distFromNode(targetNodeId);
+		oneToAllDistance = (int) planner.distFromNode(targetNodeId);
 		System.out.println("Distance from " + sourceNodeId + " to " + targetNodeId + " is " + oneToAllDistance);
 	}
 
