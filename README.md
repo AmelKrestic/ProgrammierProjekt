@@ -1,19 +1,10 @@
 # ProgrammierProjekt
 
 
-For Running Benchmark, input arguments as such: 
+###Benchmarking
 
+Run buildBenchmark.cmd and input arguments as such: 
+-graph (Path of graph file)  -lon 9.098  -lat 48.746  -que (Path of que (test) file)  -s 638394 
 
--graph (Path of graph file) 
-
-
--lon 9.098 
-
-
--lat 48.746 
-
-
--que (Path of que (test) file) 
-
-
--s 638394 
+###Regular
+Run buildNormal (further steps will be obvious)

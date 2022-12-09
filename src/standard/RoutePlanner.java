@@ -37,7 +37,7 @@ public class RoutePlanner {
 	private PriorityQueue<Integer> queue = new PriorityQueue<>(new Comparator<Integer>() {
 		@Override
 		public int compare(Integer o1, Integer o2) {
-			return (int)Math.signum( ((distanceFromOrigin[o1] - distanceFromOrigin[o2])/128));
+			return (int)Math.signum(((distanceFromOrigin[o1] - distanceFromOrigin[o2])));
 		}
 
 	});
@@ -74,7 +74,7 @@ public class RoutePlanner {
 		distanceFromOrigin = new long[nodeNr];
 		previous = new int[nodeNr];
 		checked = new boolean[nodeNr];
-		Arrays.fill(distanceFromOrigin, Long.MAX_VALUE/16);
+		Arrays.fill(distanceFromOrigin, Long.MAX_VALUE);
 		distanceFromOrigin[origin] = 0;
 	}
 	
