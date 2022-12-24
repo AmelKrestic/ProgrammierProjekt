@@ -34,30 +34,27 @@ public class RoutePlanner {
 	private int origin = 0;
 	private int dest = 0;
 	private File input = new File("./germany.fmi");
-	private PriorityQueue<Integer> queue = new PriorityQueue<>(new Comparator<Integer>() {
+	private PriorityQueue<SimpleIdDistPair> queue = new PriorityQueue<>(new Comparator<SimpleIdDistPair>() {
 		@Override
-		public int compare(Integer o1, Integer o2) {
-			return (int)Math.signum(((distanceFromOrigin[o1] - distanceFromOrigin[o2])));
+		public int compare(SimpleIdDistPair o1, SimpleIdDistPair o2) {
+
+			return Long.compare(o1.getDist(), o2.getDist());
 		}
 
 	});
 
 	public RoutePlanner() {
-		
+
 	}
-	
+
 	private RoutePlanner(int a) {
 		buildArrays();
 		long time = System.currentTimeMillis();
 		createGrid();
 		System.out.println("Time Grid for Closest Node: " + (System.currentTimeMillis() - time));
-		// Test input
-		//origin = 95020;
-		//dest = 95021;
-		
 		time = System.currentTimeMillis();
-		origin=nodeFromCoordinate( 48.746,9.098);
-		dest=nodeFromCoordinate(48.665,9.118 );
+		origin = nodeFromCoordinate(48.746, 9.098);
+		dest = nodeFromCoordinate(48.665, 9.118);
 		System.out.println("Time Closest Node: " + (System.currentTimeMillis() - time));
 
 		time = System.currentTimeMillis();
@@ -66,24 +63,23 @@ public class RoutePlanner {
 		System.out.println("Dijkstra Done");
 		System.out.println(distanceFromOrigin[dest]);
 		System.out.println(calcDistanceNodeNode(origin, dest));
-		
+
 	}
-	
+
 	private void reset() {
-		int nodeNr=distanceFromOrigin.length;
-		distanceFromOrigin = new long[nodeNr];
-		previous = new int[nodeNr];
-		checked = new boolean[nodeNr];
-		Arrays.fill(distanceFromOrigin, Long.MAX_VALUE);
+		Arrays.fill(distanceFromOrigin, Long.MAX_VALUE / 4);
+		Arrays.fill(checked, false);
+		Arrays.fill(previous,-1);
 		distanceFromOrigin[origin] = 0;
+		queue.clear();
 	}
-	
-	
+
 	public void setOrigin(int origin) {
-		this.origin=origin;
+		this.origin = origin;
 	}
+
 	public void setDestination(int dest) {
-		this.dest=dest;
+		this.dest = dest;
 	}
 
 	public void createGrid() {
@@ -92,75 +88,55 @@ public class RoutePlanner {
 				grid[i][j] = new ArrayList<>();
 			}
 		}
-//		double minLat = 100;
-//		double minLon = 100;
-//		double maxLat = 0;
-//		double maxLon = 0;
 		for (int i = 0; i < cords[0].length; i++) {
 
-//			if (minLat > cords[0][i]) {
-//				minLat = cords[0][i];
-//			}
-//			if (maxLat < cords[0][i]) {
-//				maxLat = cords[0][i];
-//			}
-//			if (minLon > cords[1][i]) {
-//				minLon = cords[1][i];
-//			}
-//			if (maxLon < cords[1][i]) {
-//				maxLon = cords[1][i];
-//			}
-//			
 			int lat = (int) ((cords[0][i] - MINLATITUDE) * gridFactor);
 			int lon = (int) ((cords[1][i] - MINLONGITUDE) * gridFactor);
 			grid[lat][lon].add(i);
 		}
 		System.out.println("Building grid done");
 	}
-	
-	public int nodeFromCoordinate(double lat,double lon) {
+
+	public int nodeFromCoordinate(double lat, double lon) {
 		int gLat = (int) ((lat - MINLATITUDE) * gridFactor);
 		int gLon = (int) ((lon - MINLONGITUDE) * gridFactor);
-		
-		List<Integer> possibleNodes=grid[gLat][gLon];
-		int minNode=-1;
-		double minDist=Double.MAX_VALUE;
-		for(Integer i:possibleNodes) {
-			double dist=calcDistanceNodeCoord(i, lat, lon);
-			if(minDist> dist) {
-				minDist=dist;
-				minNode=i;
+
+		List<Integer> possibleNodes = grid[gLat][gLon];
+		int minNode = -1;
+		double minDist = Double.MAX_VALUE;
+		for (Integer i : possibleNodes) {
+			double dist = calcDistanceNodeCoord(i, lat, lon);
+			if (minDist > dist) {
+				minDist = dist;
+				minNode = i;
 			}
 		}
 		return minNode;
-		
+
 	}
-	
+
 	public void dijkstraOneToAll() {
 		reset();
-		int currentNode=-1;
 		updateChildren(origin);
 		while (!queue.isEmpty()) {
-			currentNode = queue.poll();
-			if (!checked[currentNode]) {
-				checked[currentNode] = true;
-				updateChildren(currentNode);
-			}
-
+			dijkstraStep();
 		}
 	}
 
 	public void dijkstraOneToOne() {
 		reset();
-		
 		updateChildren(origin);
-		int currentNode = -1;
 		while (!queue.isEmpty() && !checked[dest]) {
-			currentNode = queue.poll();
-			if (!checked[currentNode]) {
-				checked[currentNode] = true;
-				updateChildren(currentNode);
-			}
+			dijkstraStep();
+		}
+	}
+
+	private void dijkstraStep() {
+		SimpleIdDistPair p = queue.poll();
+		int currentNode = p.id;
+		if (!checked[currentNode]) {
+			checked[currentNode] = true;
+			updateChildren(currentNode);
 		}
 	}
 
@@ -168,13 +144,14 @@ public class RoutePlanner {
 		long parentDist = distanceFromOrigin[nodeID];
 		for (int currentEdge = nodeToEdge[nodeID]; currentEdge < nodeToEdge[nodeID + 1]; currentEdge++) {
 			int childNode = edges[1][currentEdge];
+			// Updated distance and position in queue
 			if (!checked[childNode]) {
-				// Updated distance and position in queue
 				long potentialDist = parentDist + edges[2][currentEdge];
-				if (distanceFromOrigin[childNode] > potentialDist) {
+				if (potentialDist < distanceFromOrigin[childNode]) {
 					distanceFromOrigin[childNode] = potentialDist;
-					queue.add(childNode);
+					queue.add(new SimpleIdDistPair(childNode, potentialDist));
 					previous[childNode] = nodeID;
+
 				}
 			}
 		}
@@ -184,30 +161,30 @@ public class RoutePlanner {
 	 * [0]=lat , [1]=lon
 	 */
 	public double[] coordsFromNode(int id) {
-		double[] a= {cords[0][id],cords[1][id]};
+		double[] a = { cords[0][id], cords[1][id] };
 		return a;
 	}
-	
+
 	public long distFromNode(int id) {
 		return distanceFromOrigin[id];
 	}
-	
+
 	private double calcDistanceNodeNode(int id1, int id2) {
 		double dX = 71.5 * (cords[1][id1] - cords[1][id2]);
 		double dY = 111.3 * (cords[0][id1] - cords[0][id2]);
 
-		return Math.sqrt(dX*dX + dY * dY);
+		return Math.sqrt(dX * dX + dY * dY);
 	}
 
 	private double calcDistanceNodeCoord(int id1, double lat, double lon) {
 		double dX = 71.5 * (cords[1][id1] - lon);
 		double dY = 111.3 * (cords[0][id1] - lat);
 
-		return Math.sqrt(dX*dX + dY * dY);
+		return Math.sqrt(dX * dX + dY * dY);
 	}
 
 	public void readFile(String path) {
-		input=new File(path);
+		input = new File(path);
 		buildArrays();
 	}
 
@@ -220,11 +197,11 @@ public class RoutePlanner {
 			String line;
 			String[] splitLine;
 			int currentNode = 0;
-			// Überspringt den Anfang
+			// skips to first important line
 			for (int i = 0; i < 5; i++) {
 				fr.readLine();
 			}
-			// Arrays initialisieren
+			// initializing arrays
 
 			line = fr.readLine();
 			int nodeNr = Integer.valueOf(line);
@@ -269,4 +246,18 @@ public class RoutePlanner {
 
 	}
 
+	private class SimpleIdDistPair {
+		public int id;
+		public long dist;
+
+		public SimpleIdDistPair(int pid, long pdist) {
+			id = pid;
+			dist = pdist;
+		}
+
+		public long getDist() {
+			return dist;
+		}
+
+	}
 }

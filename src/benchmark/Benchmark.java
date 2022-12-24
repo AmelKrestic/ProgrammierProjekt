@@ -13,6 +13,7 @@ public class Benchmark {
 		double lon = Double.parseDouble(args[3]);
 		double lat = Double.parseDouble(args[5]);
 		String quePath = args[7];
+		String solPath = quePath.replace(".que", ".sol");
 		int sourceNodeId = Integer.parseInt(args[9]);
 
 		RoutePlanner planner = new RoutePlanner();
@@ -50,8 +51,11 @@ public class Benchmark {
 		System.out.println("Running one-to-one Dijkstras for queries in .que file " + quePath);
 		long queStart = System.currentTimeMillis();
 		try (BufferedReader bufferedReader = new BufferedReader(new FileReader(quePath))) {
+			BufferedReader buffSol=new BufferedReader(new FileReader(solPath));
+			String currSol;
 			String currLine;
 			while ((currLine = bufferedReader.readLine()) != null) {
+				currSol=buffSol.readLine();
 				int oneToOneSourceNodeId = Integer.parseInt(currLine.substring(0, currLine.indexOf(" ")));
 				int oneToOneTargetNodeId = Integer.parseInt(currLine.substring(currLine.indexOf(" ") + 1));
 				int oneToOneDistance = -42;
@@ -62,8 +66,12 @@ public class Benchmark {
 				planner.setDestination(oneToOneTargetNodeId);
 				planner.dijkstraOneToOne();
 				oneToOneDistance = (int) planner.distFromNode(oneToOneTargetNodeId);
+				
+				if(!currSol.equals(String.valueOf(oneToOneDistance))) {
+					System.out.println(planner.distFromNode(oneToOneTargetNodeId)+" "+Long.MAX_VALUE/16);
+					System.out.print("Should be:"+currSol+" but is:");
+				}
 				System.out.println(oneToOneDistance);
-
 			}
 		} catch (Exception e) {
 			System.out.println("Exception...");

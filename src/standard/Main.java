@@ -36,7 +36,7 @@ public class Main {
 				rp.setOrigin(src);
 				rp.setDestination(dest);
 				rp.dijkstraOneToOne();
-
+				System.out.println("Distance: " + rp.distFromNode(dest));
 			}
 			if (input.equals("a") || input.equals("all")) {
 				depth++;
