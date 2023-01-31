@@ -1,9 +1,10 @@
-package benchmark;
+package project.pathfinding.benchmark;
 
-import standard.*;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.util.Scanner;
+
+import project.pathfinding.standard.*;
 
 public class Benchmark {
 

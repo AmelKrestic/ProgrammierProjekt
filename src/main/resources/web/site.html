@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="de">
+
+<head>
+
+     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.3/dist/leaflet.css"
+          integrity="sha256-kLaT2GOSpHechhsozzB+flnD+zUyjE2LlfWPgU04xyI=" crossorigin="" />
+
+     <script src="https://unpkg.com/leaflet@1.9.3/dist/leaflet.js"
+          integrity="sha256-WBkoXOwTeyKclOHuWtc+i2uENFpDZ9YPdf5Hf+D7ewM=" crossorigin=""></script>
+
+
+     <style>
+          #map {
+               height: 480px;
+               width: 720px
+          }
+     </style>
+</head>
+
+<title>Seite</title>
+<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+</head>
+
+<body>
+
+     <div id="map"></div>
+     <div id="current">Etwas</div>
+     <div id="FromSurround"><button onclick="buttonClick(0)">From</button>  <div id="From">Etwas</div></div>
+     <div id="ToSurround"><button onclick="buttonClick(1)">To</button> <div id="To">Etwas</div></div>
+     <button onclick="calc()">Calculate</button><button onclick="reset()">Reset</button>
+
+
+
+     <script>
+          var map = L.map('map').setView([48.746171304887376, 9.106657127649813], 17);
+          var myLayer = L.geoJSON().addTo(map);
+          var points=[null,null];
+          var ids=[-1,-1];
+          var possiblePoint=null;
+          var possibleID=-1;
+          var path=null;
+
+
+          function onMapClick(e) {
+               const Http = new XMLHttpRequest();
+               const url = 'http://localhost:8080/test';
+               Http.open("POST", url);
+               Http.setRequestHeader("type","find");
+               Http.send(e.latlng.lat+" "+e.latlng.lng);
+               Http.onreadystatechange = (e) => {
+                    var response = Http.responseText;
+                    if(response.length>0){
+                         var parsedResponse= JSON.parse(response);
+                         possibleID=parsedResponse.id;
+                         delete parsedResponse.id;
+                         possiblePoint=parsedResponse;
+                         document.getElementById('current').innerHTML = possiblePoint.coordinates+" "+possibleID;
+                         redraw();
+                         
+                    }
+               }
+              
+               //alert("You clicked the map at " + e.latlng);
+          }
+
+
+          function redraw(){
+               var s = {style:{
+                    color: "#ffffff",
+                    fillColor: "#ff7800",
+                    weight: 5,
+                    opacity: 0.65
+               }}
+               map.removeLayer( myLayer );
+               myLayer = L.geoJSON().addTo(map);
+
+              
+
+
+               //Drawing of Points
+               for (i=0;i<points.length;i++){
+                    if(points[i]!=null){
+                         myLayer.addData(points[i]);
+                    }
+               }
+               if(possiblePoint!=null){
+                    myLayer.addData(possiblePoint);
+               }
+
+
+               //Drawing of Path
+               if(path!=null){
+                    myLayer.addData(path);
+               }
+               
+          }
+          
+          function buttonClick(i) {
+               if(possiblePoint!=null){
+                    var temp=['From', 'To'];
+                    points[i]=possiblePoint;
+                    ids[i]=possibleID;
+                    document.getElementById(temp[i]).innerHTML = possiblePoint.coordinates+" "+possibleID;
+                    possiblePoint=null;
+                    possibleID=-1;
+                    document.getElementById("current").innerHTML = "<br>" ;
+               }
+               redraw();
+               
+          }
+
+          function calc(){
+               if(ids[0]<0||ids[1]<0){
+                    return ;
+               }
+               const Http = new XMLHttpRequest();
+               const url = 'http://localhost:8080/test';
+               Http.open("POST", url);
+               Http.setRequestHeader("type","calc");
+               Http.send(ids[0]+" "+ids[1]);
+               Http.onreadystatechange = (e) => {
+                    var response = Http.responseText;
+                    if(response.length>0){
+                         var parsedResponse= JSON.parse(response);
+                         path = parsedResponse;
+                         redraw();
+                         
+                    }
+               }
+          }
+        
+          
+          function reset(){
+               points=[null,null];
+               ids=[-1,-1];
+               possiblePoint=null;
+               possibleID=-1;
+               path=null;
+               redraw();
+          }
+          
+
+          L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+               maxZoom: 19,
+               attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+          }).addTo(map);
+          map.on('click', onMapClick);
+
+
+
+     </script>
+
+
+</body>
+
+</html>

@@ -10,3 +10,10 @@ Run buildBenchmark and input arguments as such:
 
 ###Regular
 Run buildNormal (further steps will be obvious)
+
+
+###Server
+Run the Server script. (Jar with dependencies must be present in target folder)
+Input Path of Graph file.
+Server will listen to requests on localhost:8080.
+(Server will continue running even if the command window is closed, so it will have to be shut down manually)

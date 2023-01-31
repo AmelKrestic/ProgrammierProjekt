@@ -1,4 +1,4 @@
-package standard;
+package project.pathfinding.standard;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.PriorityQueue;
 
@@ -157,7 +158,7 @@ public class RoutePlanner {
 		}
 	}
 
-	/*
+	/**
 	 * [0]=lat , [1]=lon
 	 */
 	public double[] coordsFromNode(int id) {
@@ -168,6 +169,30 @@ public class RoutePlanner {
 	public long distFromNode(int id) {
 		return distanceFromOrigin[id];
 	}
+	
+	
+	public List<Integer> nodesOriginToDest() {
+		LinkedList<Integer> list =new LinkedList();
+		int node=dest;
+		list.addFirst(node);
+		while(previous[node]!=-1&&node!=origin) {
+			node=previous[node];
+			list.addFirst(node);
+		}
+		return list;
+	}
+	
+	public List<double[]> coordsOriginToDest() {
+		LinkedList<double[]> list =new LinkedList();
+		int node=dest;
+		list.addFirst(cords[node]);
+		while(previous[node]!=-1&&node!=origin) {
+			node=previous[node];
+			list.addFirst(cords[node]);
+		}
+		return list;
+	}
+	
 
 	private double calcDistanceNodeNode(int id1, int id2) {
 		double dX = 71.5 * (cords[1][id1] - cords[1][id2]);

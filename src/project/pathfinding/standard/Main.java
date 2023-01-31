@@ -1,4 +1,4 @@
-package standard;
+package project.pathfinding.standard;
 
 import java.util.Scanner;
 
