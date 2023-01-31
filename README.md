@@ -1,6 +1,4 @@
 # ProgrammierProjekt
-
-
 ##Benchmarking
 
 Run buildBenchmark and input arguments as such: 
