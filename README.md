@@ -10,7 +10,7 @@ Run buildNormal (further steps will be obvious)
 
 
 ## Server
-Run the Server compilation script (requires maven) and then the run script. (Jar with dependencies must be present in target folder, i.e. compile first)  
+Run the Server compilation script (requires maven, Java version 17) and then the run script. (Jar with dependencies must be present in target folder, i.e. compile first)  
 
 Input the path (and only the path) of graph file.  
 Server will listen to requests on localhost:8080.  
