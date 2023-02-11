@@ -1,19 +1,17 @@
 # ProgrammierProjekt
 
+## Benchmarking
+Run buildBenchmark and input arguments as such:   
+-graph (Path of graph file)  -lon 9.098  -lat 48.746  -que (Path of que (test) file)  -s 638394   
+.sol file is checked automatically. Must be in the same directory as the .que file   
 
-###Benchmarking
-
-Run buildBenchmark and input arguments as such: 
--graph (Path of graph file)  -lon 9.098  -lat 48.746  -que (Path of que (test) file)  -s 638394 
-
-.sol file is checked automatically. Must be in the same directory as the .que file
-
-###Regular
+## Regular
 Run buildNormal (further steps will be obvious)
 
 
-###Server
-Run the Server script. (Jar with dependencies must be present in target folder)
-Input Path of Graph file.
-Server will listen to requests on localhost:8080.
-(Server will continue running even if the command window is closed, so it will have to be shut down manually)
+## Server
+Run the Server compilation script (requires maven, Java version 17) and then the run script. (Jar with dependencies must be present in target folder, i.e. compile first)  
+
+Input the path (and only the path) of graph file.  
+Server will listen to requests on localhost:8080.  
+(Server will continue running even if the command window is closed, so it will have to be shut down manually)  
